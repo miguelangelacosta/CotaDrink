@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CotaDrink - Tragos a Domicilio</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.268.0/dist/lucide.min.js"></script>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<section class="pantalla activa" id="login">
+  <img src="./assets/CotaDrink logo.png" class="hero" alt="CotaDrink">
+  <h1>CotaDrink</h1>
+  <p class="sub">🔞 Venta exclusiva para mayores de 18 años</p>
+  <label class="check">
+    <input type="checkbox" id="checkEdad"> Confirmo que soy mayor de 18 años
+  </label>
+  <button class="btn-principal" onclick="ingresar()">Ingresar</button>
+  <small class="nota">Se solicitará documento de identidad al entregar el pedido</small>
+</section>
+
+<!-- ================= MENÚ ================= -->
+<section class="pantalla" id="menu">
+  <header class="top-bar">
+    <h2>CotaDrink</h2>
+    <button class="btn-salir" onclick="salir()">Salir</button>
+  </header>
+
+  <!-- FILTROS -->
+  <div class="filtros">
+    <button onclick="filtrar('todos')">Todos</button>
+    <button onclick="filtrar('cerveza')">Cerveza</button>
+    <button onclick="filtrar('vino')">Vino</button>
+    <button onclick="filtrar('whisky')">Whisky</button>
+    <button onclick="filtrar('cigarro')">Cigarros</button>
+  </div>
+
+  <!-- PRODUCTOS -->
+  <div id="productos" class="grid"></div>
+</section>
+
+<!-- ================= ORDEN ================= -->
+<section class="pantalla" id="orden">
+  <header class="top-bar">
+    <h2>🛒 Mi Orden</h2>
+    <button class="btn-salir" onclick="mostrar('menu')">Volver</button>
+  </header>
+
+  <div id="lista" class="lista-carrito"></div>
+
+  <div class="resumen">
+    <h3>Total: $<span id="total">0</span></h3>
+    <button class="btn-vaciar" onclick="vaciarCarrito()">Vaciar carrito</button>
+    <button class="btn-principal" onclick="mostrar('confirmacion')">Continuar</button>
+  </div>
+</section>
+
+<!-- ================= CONFIRMACIÓN ================= -->
+<section class="pantalla" id="confirmacion">
+  <header class="top-bar">
+    <h2>Confirmar pedido</h2>
+    <button class="btn-salir" onclick="mostrar('orden')">Volver</button>
+  </header>
+
+  <div class="formulario">
+    <input id="direccion" placeholder="Dirección de entrega" />
+    <select id="pago">
+      <option value="Efectivo">Efectivo</option>
+      <option value="Nequi">Nequi</option>
+      <option value="Daviplata">Daviplata</option>
+    </select>
+    <button class="btn-principal" onclick="enviarWhatsApp()">Enviar pedido por WhatsApp</button>
+  </div>
+</section>
+
+<!-- ================= NAV INFERIOR ================= -->
+<nav class="nav-inferior" id="navInferior">
+  <button onclick="mostrar('menu')">
+    <i data-lucide="cup"></i>
+    <span>Menú</span>
+  </button>
+  <button onclick="mostrar('orden')" id="btnCarrito">
+    <i data-lucide="shopping-cart"></i>
+    <span>Carrito</span>
+  </button>
+</nav>
+
+<!-- JS -->
+<script src="data.js" defer></script>  <!-- Productos -->
+<script src="script.js" defer></script> <!-- Lógica -->
+<script>
+  lucide.replace(); <!-- Inicializa iconos -->
+</script>
+</body>
+</html>
