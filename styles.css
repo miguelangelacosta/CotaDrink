@@ -1,8 +1,6 @@
 /* ================= RESET ================= */
 
-
 @import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap'); 
-
 
 * {
   margin: 0;
@@ -161,9 +159,26 @@ h1 {
 /* ================= GRID PRODUCTOS ================= */
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, 1fr); /* 2 tarjetas por fila */
   gap: 16px;
   margin-bottom: 20px;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 tarjetas en móviles normales */
+  }
+
+  .pantalla {
+    padding: 20px 10px 200px 10px; /* espacio para nav y resumen */
+  }
+}
+
+@media (max-width: 360px) {
+  .grid {
+    grid-template-columns: 1fr; /* 1 tarjeta en pantallas muy pequeñas */
+  }
 }
 
 /* ================= CARD ================= */
@@ -373,38 +388,34 @@ h1 {
   font-weight: 700;
 }
 
-
+/* ================= MENSAJE SISTEMA ================= */
 .mensaje-sistema {
- 
   color: #fff;
   font-weight: 500;
   text-align: center;
-  padding: 1px 10px;
+  padding: 6px 14px;
   border-radius: 20px;
-  margin-bottom: 6px;
-  
+  margin-bottom: 12px;
+  background: rgba(0,0,0,0.5);
+  font-size: 14px;
+  transition: opacity 0.5s ease;
 }
 
-
+/* ================= TITULO GRAFITI ================= */
 .titulo-grafiti {
   font-family: 'UnifrakturCook', cursive;
-  font-size: 80px; /* mucho más grande para móviles, ajusta según pantalla */
+  font-size: 80px;
   color: #ff0055;
-  text-transform: capitalize; /* C mayúscula */
+  text-transform: capitalize;
   text-align: center;
   margin: 20px 0;
-  
-  /* Contorno gótico/chicano */
+
   text-shadow:
-    4px 4px 0 #000,   /* borde negro */
-    8px 8px 0 #ffb703; /* borde secundario amarillo */
-  
-  /* Efecto degradado opcional */
+    4px 4px 0 #000,
+    8px 8px 0 #ffb703;
+
   background: linear-gradient(45deg, #ff0055, #ffb703);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-
-  /* Más presencia */
   letter-spacing: 2px;
 }
-

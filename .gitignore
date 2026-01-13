@@ -1,6 +1,8 @@
-node_modules/
-android/
-ios/
-deploy/
-.idea/
-.DS_Store
+# Ignorar todo
+*
+
+# Permitir solo estos archivos
+!index.html
+!styles.css
+!script.js
+!data.js
