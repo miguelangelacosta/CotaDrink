@@ -1,239 +1,209 @@
-/*************************
- * CONFIGURACIÓN
- *************************/
-const DOMICILIO = 7000;
-const NUMERO_NEGOCIO = "573175533775";
+// ================= ESTADO =================
+let carrito = []
+let categoriaActual = 'todos'
+const DOMICILIO = 7000
 
-let carrito = [];
-const cont = id => document.getElementById(id);
+const $ = id => document.getElementById(id)
 
-/*************************
- * NAV
- *************************/
-function mostrarNav() { cont("navInferior").style.display = "flex"; }
-function ocultarNav() { cont("navInferior").style.display = "none"; }
+// ================= NAVEGACION =================
+function mostrar(id) {
+  document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'))
+  $(id).classList.add('activa')
 
-/*************************
- * PANTALLAS
- *************************/
-function mostrar(id){
-  document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("activa"));
-  cont(id).classList.add("activa");
-  id === "login" ? ocultarNav() : mostrarNav();
+  // Mostrar nav solo en menú y carrito
+  const nav = $('navInferior')
+  nav.style.display = (id === 'menu' || id === 'orden') ? 'flex' : 'none'
 }
 
-/*************************
- * INGRESAR
- *************************/
-function ingresar(){
-  const check = cont("checkEdad");
-  if(!check.checked){ alert("Debes confirmar que eres mayor de 18 años"); return; }
-  localStorage.setItem("edadOK", "true");
-  mostrar("menu");
-  renderProductos(productos);
-}
-
-/*************************
- * SALIR
- *************************/
-function salir(){
-  localStorage.removeItem("edadOK");
-  vaciarCarrito();
-  mostrar("login");
-}
-
-/*************************
- * CARGA INICIAL
- *************************/
-window.onload = () => {
-  if(localStorage.getItem("edadOK") === "true"){
-    mostrar("menu");
-    renderProductos(productos);
-  } else mostrar("login");
-}
-
-/*************************
- * RENDER PRODUCTOS
- *************************/
-function renderProductos(lista){
-  const div = cont("productos");
-  div.innerHTML = "";
-
-  lista.forEach(p => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <div class="badge">✔ Agregado</div>
-      <img src="${p.img}" alt="${p.nombre}">
-      <h3>${p.nombre}</h3>
-      <p>$${p.precio.toLocaleString()}</p>
-      <button>Agregar</button>
-    `;
-
-    const btn = card.querySelector("button");
-    btn.onclick = () => {
-      agregarProducto(p.id);
-      animarAgregar(card);
-      efectoCard(card, btn);
-    };
-
-    div.appendChild(card);
-  });
-}
-
-/*************************
- * AGREGAR PRODUCTO AL CARRITO
- *************************/
-function agregarProducto(id){
-  const producto = productos.find(p => p.id === id);
-  const existente = carrito.find(p => p.id === id);
-
-  if(existente) existente.cantidad++;
-  else carrito.push({...producto, cantidad: 1});
-
-  actualizarCarrito();
-}
-
-/*************************
- * SUMAR / RESTAR
- *************************/
-function sumar(id){
-  const p = carrito.find(p => p.id === id);
-  if(p){ p.cantidad++; actualizarCarrito(); }
-}
-
-function restar(id){
-  const i = carrito.findIndex(p => p.id === id);
-  if(i >= 0){
-    carrito[i].cantidad--;
-    if(carrito[i].cantidad <= 0) carrito.splice(i,1);
-    actualizarCarrito();
+// ================= LOGIN =================
+function ingresar() {
+  if (!$('checkEdad').checked) {
+    alert('Debes ser mayor de edad')
+    return
   }
+  mostrar('menu')
+  renderProductos()
+
+  // Mostrar botón flotante
+  $('botonCarrito').style.display = 'flex'
 }
 
-/*************************
- * VACIAR CARRITO
- *************************/
-function vaciarCarrito(){
-  carrito = [];
-  actualizarCarrito();
+function salir() {
+  carrito = []
+  actualizarCarrito()
+  mostrar('login')
+
+  // Ocultar botón flotante
+  $('botonCarrito').style.display = 'none'
 }
 
-/*************************
- * ACTUALIZAR CARRITO
- *************************/
-function actualizarCarrito(){
-  const lista = cont("lista");
-  const totalHTML = cont("total");
+// ================= PRODUCTOS =================
+function renderProductos(texto = '') {
+  const cont = $('productos')
+  cont.innerHTML = ''
 
-  lista.innerHTML = "";
+  productos
+    .filter(p => categoriaActual === 'todos' || p.categoria === categoriaActual)
+    .filter(p => p.nombre.toLowerCase().includes(texto.toLowerCase()))
+    .forEach(p => {
+      cont.innerHTML += `
+        <div class="card">
+          <img src="${p.img}" alt="${p.nombre}">
+          <h3>${p.nombre}</h3>
+          <p>$${p.precio}</p>
+          <button onclick="agregar(${p.id}, this)">Agregar</button>
+        </div>
+      `
+    })
+}
 
-  let subtotal = 0;
+// ================= FILTROS Y BUSCADOR =================
+function filtrar(cat) {
+  categoriaActual = cat
+  document.querySelectorAll('.filtros button').forEach(b => b.classList.remove('active'))
+  event.target.classList.add('active')
+  renderProductos()
+}
 
+function buscarProducto(texto) {
+  renderProductos(texto)
+}
+
+// ================= CARRITO =================
+function agregar(id, btn) {
+  const prod = productos.find(p => p.id === id)
+  const existe = carrito.find(p => p.id === id)
+
+  if (existe) {
+    existe.cantidad++
+  } else {
+    carrito.push({ ...prod, cantidad: 1 })
+  }
+
+  // Animación producto → carrito
+  animarCarrito(btn)
+
+  actualizarCarrito()
+}
+
+function cambiarCantidad(id, cambio) {
+  const item = carrito.find(p => p.id === id)
+  if (!item) return
+
+  item.cantidad += cambio
+  if (item.cantidad <= 0) carrito = carrito.filter(p => p.id !== id)
+  actualizarCarrito()
+}
+
+function actualizarCarrito() {
+  const lista = $('lista')
+  lista.innerHTML = ''
+
+  let subtotal = 0
   carrito.forEach(p => {
-    const totalProducto = p.precio * p.cantidad;
-    subtotal += totalProducto;
+    const totalItem = p.precio * p.cantidad
+    subtotal += totalItem
 
     lista.innerHTML += `
       <div class="item-carrito">
-        <span>${p.nombre} (${p.cantidad} x $${p.precio.toLocaleString()})</span>
-        <span>$${totalProducto.toLocaleString()}</span>
-        <div>
-          <button onclick="restar(${p.id})">−</button>
-          <button onclick="sumar(${p.id})">+</button>
+        <span>${p.nombre}</span>
+        <div class="cantidad">
+          <button onclick="cambiarCantidad(${p.id}, -1)">−</button>
+          <strong>${p.cantidad}</strong>
+          <button onclick="cambiarCantidad(${p.id}, 1)">+</button>
         </div>
+        <strong>$${totalItem}</strong>
       </div>
-    `;
-  });
+    `
+  })
 
-  const total = carrito.length > 0 ? subtotal + DOMICILIO : 0;
+  // Totales
+  $('subtotal').textContent = subtotal
+  $('domicilio').textContent = carrito.length ? DOMICILIO : 0
+  $('total').textContent = carrito.length ? subtotal + DOMICILIO : 0
 
-  totalHTML.innerHTML = carrito.length > 0
-    ? `Subtotal: $${subtotal.toLocaleString()} <br>Domicilio: $${DOMICILIO.toLocaleString()} <br><strong>Total: $${total.toLocaleString()}</strong>`
-    : "Carrito vacío";
+  // Actualizar botón flotante
+  $('cantidadCarrito').textContent = carrito.reduce((acc, p) => acc + p.cantidad, 0)
 }
 
-/*************************
- * ENVIAR PEDIDO POR WHATSAPP
- *************************/
-function enviarWhatsApp(){
-  if(carrito.length === 0) return alert("Carrito vacío");
+// Vaciar carrito
+function vaciarCarrito() {
+  carrito = []
+  actualizarCarrito()
+}
 
-  const direccion = cont("direccion").value.trim();
-  const pago = cont("pago").value;
-  if(!direccion) return alert("Ingresa la dirección");
+// ================= WHATSAPP =================
+function enviarWhatsApp() {
+  if (!carrito.length) {
+    alert('El carrito está vacío')
+    return
+  }
 
-  let mensaje = "🍾 *CotaDrink - Pedido*\n\n";
-  let subtotal = 0;
+  const dir = $('direccion').value.trim()
+  const pago = $('pago').value
+
+  if (!dir) {
+    alert('Ingresa la dirección')
+    return
+  }
+
+  let subtotal = 0
+  let msg = `🛒 *Pedido CotaDrink*%0A%0A`
 
   carrito.forEach(p => {
-    const totalProducto = p.precio * p.cantidad;
-    subtotal += totalProducto;
-    mensaje += `• ${p.nombre} (${p.cantidad} x $${p.precio.toLocaleString()}) = $${totalProducto.toLocaleString()}\n`;
-  });
+    const totalItem = p.precio * p.cantidad
+    subtotal += totalItem
+    msg += `• ${p.nombre} x${p.cantidad} - $${totalItem}%0A`
+  })
 
-  const total = subtotal + DOMICILIO;
+  msg += `%0A🚚 Domicilio: $${DOMICILIO}`
+  msg += `%0A💵 Total: $${subtotal + DOMICILIO}`
+  msg += `%0A📍 Dirección: ${dir}`
+  msg += `%0A💰 Pago: ${pago}`
 
-  mensaje += `\nSubtotal: $${subtotal.toLocaleString()}`;
-  mensaje += `\nDomicilio: $${DOMICILIO.toLocaleString()}`;
-  mensaje += `\n*Total: $${total.toLocaleString()}*`;
-  mensaje += `\n\n📍 Dirección: ${direccion}`;
-  mensaje += `\n💰 Pago: ${pago}`;
-  mensaje += `\n🪪 Mayoría de edad verificada al entregar`;
-
-  window.open(`https://wa.me/${NUMERO_NEGOCIO}?text=${encodeURIComponent(mensaje)}`, "_blank");
+  window.open(`https://wa.me/573175533775?text=${msg}`, '_blank')
 }
 
-/*************************
- * ANIMACIONES CARD
- *************************/
-function animarAgregar(card){
-  const img = card.querySelector("img");
-  const cart = cont("btnCarrito");
-  if(!img || !cart) return;
+// ================= ANIMACION PRODUCTO =================
+function animarCarrito(btn) {
+  const img = btn.parentElement.querySelector('img')
+  const imgClone = img.cloneNode(true)
+  const rect = img.getBoundingClientRect()
+  imgClone.style.position = 'fixed'
+  imgClone.style.left = rect.left + 'px'
+  imgClone.style.top = rect.top + 'px'
+  imgClone.style.width = rect.width + 'px'
+  imgClone.style.height = rect.height + 'px'
+  imgClone.style.transition = 'all 0.7s ease-in-out'
+  imgClone.style.zIndex = 1000
+  document.body.appendChild(imgClone)
 
-  const imgRect = img.getBoundingClientRect();
-  const cartRect = cart.getBoundingClientRect();
+  const cartIcon = document.querySelector('#botonCarrito')
+  const cartRect = cartIcon.getBoundingClientRect()
 
-  const clone = img.cloneNode(true);
-  clone.style.position = "fixed";
-  clone.style.left = imgRect.left + "px";
-  clone.style.top = imgRect.top + "px";
-  clone.style.width = imgRect.width + "px";
-  clone.style.height = imgRect.height + "px";
-  clone.style.zIndex = 9999;
-  clone.style.transition = "all .6s ease";
+  setTimeout(() => {
+    imgClone.style.left = cartRect.left + 'px'
+    imgClone.style.top = cartRect.top + 'px'
+    imgClone.style.width = '0px'
+    imgClone.style.height = '0px'
+    imgClone.style.opacity = '0'
+  }, 10)
 
-  document.body.appendChild(clone);
-
-  requestAnimationFrame(()=>{
-    clone.style.left = cartRect.left + cartRect.width/2 + "px";
-    clone.style.top = cartRect.top + "px";
-    clone.style.width = "20px";
-    clone.style.height = "20px";
-    clone.style.opacity = "0.3";
-  });
-
-  setTimeout(()=> clone.remove(), 600);
+  setTimeout(() => {
+    imgClone.remove()
+  }, 800)
 }
 
-/*************************
- * EFECTO CARD
- *************************/
-function efectoCard(card, btn){
-  card.classList.add("agregado");
-  btn.classList.add("agregado");
+// ================= INICIO =================
+mostrar('login')
 
-  setTimeout(()=>{
-    card.classList.remove("agregado");
-    btn.classList.remove("agregado");
-  },700);
-}
 
-/*************************
- * FILTROS
- *************************/
-function filtrar(cat){
-  if(cat === "todos") renderProductos(productos);
-  else renderProductos(productos.filter(p => p.categoria === cat));
-}
+
+// Mostrar mensaje por 3 segundos
+const mensaje = $('mensajeSistema');
+mensaje.textContent = "🍹 ¡Bienvenido a CotaDrink! Explora productos, agrégalos al carrito y recibe tu pedido en casa en minutos.";
+mensaje.style.opacity = '1';
+
+setTimeout(() => {
+  mensaje.style.opacity = '0';
+}, 3000);
