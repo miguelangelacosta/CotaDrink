@@ -1,8 +1,7 @@
-# Ignorar todo
-*
-
-# Permitir solo estos archivos
-!index.html
-!styles.css
-!script.js
-!data.js
+# Ignorar Node.js y Capacitor
+node_modules/
+package-lock.json
+package.json
+capacitor.config.json
+android/
+ios/
