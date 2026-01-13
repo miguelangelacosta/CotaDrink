@@ -237,3 +237,24 @@ function filtrar(cat){
   if(cat === "todos") renderProductos(productos);
   else renderProductos(productos.filter(p => p.categoria === cat));
 }
+  
+
+function buscarProducto() {
+  const texto = document.getElementById("busqueda").value.toLowerCase();
+  const contenedor = document.getElementById("productos");
+
+  contenedor.innerHTML = "";
+
+  productos
+    .filter(p => p.nombre.toLowerCase().includes(texto))
+    .forEach(p => {
+      contenedor.innerHTML += `
+        <div class="card">
+          <img src="${p.imagen}">
+          <h3>${p.nombre}</h3>
+          <p>$${p.precio}</p>
+          <button onclick="agregar(${p.id})">Agregar</button>
+        </div>
+      `;
+    });
+}

@@ -1,0 +1,6 @@
+node_modules/
+android/
+ios/
+deploy/
+.idea/
+.DS_Store
