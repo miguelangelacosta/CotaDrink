@@ -2,17 +2,19 @@
 let carrito = []
 let categoriaActual = 'todos'
 const DOMICILIO = 7000
-
 const $ = id => document.getElementById(id)
 
 // ================= NAVEGACION =================
 function mostrar(id) {
-  document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'))
+  document.querySelectorAll('.pantalla')
+    .forEach(p => p.classList.remove('activa'))
+
   $(id).classList.add('activa')
 
-  // Mostrar nav solo en menú y carrito
   const nav = $('navInferior')
-  nav.style.display = (id === 'menu' || id === 'orden') ? 'flex' : 'none'
+  if (nav) {
+    nav.style.display = (id === 'menu' || id === 'orden') ? 'flex' : 'none'
+  }
 }
 
 // ================= LOGIN =================
@@ -23,8 +25,6 @@ function ingresar() {
   }
   mostrar('menu')
   renderProductos()
-
-  // Mostrar botón flotante
   $('botonCarrito').style.display = 'flex'
 }
 
@@ -32,8 +32,6 @@ function salir() {
   carrito = []
   actualizarCarrito()
   mostrar('login')
-
-  // Ocultar botón flotante
   $('botonCarrito').style.display = 'none'
 }
 
@@ -46,21 +44,66 @@ function renderProductos(texto = '') {
     .filter(p => categoriaActual === 'todos' || p.categoria === categoriaActual)
     .filter(p => p.nombre.toLowerCase().includes(texto.toLowerCase()))
     .forEach(p => {
+
+      const itemCarrito = carrito.find(i => i.id === p.id)
+      const cantidad = itemCarrito ? itemCarrito.cantidad : 1
+
       cont.innerHTML += `
         <div class="card">
           <img src="${p.img}" alt="${p.nombre}">
           <h3>${p.nombre}</h3>
-          <p>$${p.precio}</p>
-          <button onclick="agregar(${p.id}, this)">Agregar</button>
+
+          <div class="fila-precio">
+            <p>$${p.precio}</p>
+
+            <div class="cantidad-card">
+              <button onclick="cambiarCantidadCard(${p.id}, -1)">−</button>
+              <span id="cantidad-card-${p.id}">${cantidad}</span>
+              <button onclick="cambiarCantidadCard(${p.id}, 1)">+</button>
+            </div>
+          </div>
+
+          <button onclick="agregarConCantidad(${p.id}, this)">Agregar</button>
         </div>
       `
     })
 }
 
-// ================= FILTROS Y BUSCADOR =================
+// ================= CANTIDAD EN CARD =================
+function cambiarCantidadCard(id, cambio) {
+  const span = document.getElementById(`cantidad-card-${id}`)
+  if (!span) return
+
+  let valor = parseInt(span.textContent) + cambio
+  if (valor < 1) valor = 1
+  span.textContent = valor
+}
+
+// ================= AGREGAR DESDE CARD =================
+function agregarConCantidad(id, btn) {
+  const prod = productos.find(p => p.id === id)
+  const cantidad = parseInt(
+    document.getElementById(`cantidad-card-${id}`).textContent
+  )
+
+  const existe = carrito.find(p => p.id === id)
+
+  if (existe) {
+    existe.cantidad += cantidad
+  } else {
+    carrito.push({ ...prod, cantidad })
+  }
+
+  animarCarrito(btn)
+  actualizarCarrito()
+}
+
+// ================= FILTROS =================
 function filtrar(cat) {
   categoriaActual = cat
-  document.querySelectorAll('.filtros button').forEach(b => b.classList.remove('active'))
+  document.querySelectorAll('.filtros button')
+    .forEach(b => b.classList.remove('active'))
+
   event.target.classList.add('active')
   renderProductos()
 }
@@ -70,29 +113,17 @@ function buscarProducto(texto) {
 }
 
 // ================= CARRITO =================
-function agregar(id, btn) {
-  const prod = productos.find(p => p.id === id)
-  const existe = carrito.find(p => p.id === id)
-
-  if (existe) {
-    existe.cantidad++
-  } else {
-    carrito.push({ ...prod, cantidad: 1 })
-  }
-
-  // Animación producto → carrito
-  animarCarrito(btn)
-
-  actualizarCarrito()
-}
-
 function cambiarCantidad(id, cambio) {
   const item = carrito.find(p => p.id === id)
   if (!item) return
 
   item.cantidad += cambio
-  if (item.cantidad <= 0) carrito = carrito.filter(p => p.id !== id)
+  if (item.cantidad <= 0) {
+    carrito = carrito.filter(p => p.id !== id)
+  }
+
   actualizarCarrito()
+  renderProductos()
 }
 
 function actualizarCarrito() {
@@ -100,36 +131,42 @@ function actualizarCarrito() {
   lista.innerHTML = ''
 
   let subtotal = 0
+
   carrito.forEach(p => {
     const totalItem = p.precio * p.cantidad
     subtotal += totalItem
 
     lista.innerHTML += `
       <div class="item-carrito">
-        <span>${p.nombre}</span>
+        <img src="${p.img}" alt="${p.nombre}">
+
+        <div class="info">
+          <h4>${p.nombre}</h4>
+          <p>$${p.precio} x ${p.cantidad}</p>
+        </div>
+
         <div class="cantidad">
           <button onclick="cambiarCantidad(${p.id}, -1)">−</button>
-          <strong>${p.cantidad}</strong>
+          <span>${p.cantidad}</span>
           <button onclick="cambiarCantidad(${p.id}, 1)">+</button>
         </div>
-        <strong>$${totalItem}</strong>
+
+        <strong class="total">$${totalItem}</strong>
       </div>
     `
   })
 
-  // Totales
   $('subtotal').textContent = subtotal
   $('domicilio').textContent = carrito.length ? DOMICILIO : 0
   $('total').textContent = carrito.length ? subtotal + DOMICILIO : 0
-
-  // Actualizar botón flotante
-  $('cantidadCarrito').textContent = carrito.reduce((acc, p) => acc + p.cantidad, 0)
+  $('cantidadCarrito').textContent =
+    carrito.reduce((a, p) => a + p.cantidad, 0)
 }
 
-// Vaciar carrito
 function vaciarCarrito() {
   carrito = []
   actualizarCarrito()
+  renderProductos()
 }
 
 // ================= WHATSAPP =================
@@ -147,8 +184,8 @@ function enviarWhatsApp() {
     return
   }
 
-  let subtotal = 0
   let msg = `🛒 *Pedido CotaDrink*%0A%0A`
+  let subtotal = 0
 
   carrito.forEach(p => {
     const totalItem = p.precio * p.cantidad
@@ -161,49 +198,38 @@ function enviarWhatsApp() {
   msg += `%0A📍 Dirección: ${dir}`
   msg += `%0A💰 Pago: ${pago}`
 
-  window.open(`https://wa.me/573175533775?text=${msg}`, '_blank')
+  window.open(
+    `https://wa.me/573175533775?text=${msg}`,
+    '_blank'
+  )
 }
 
-// ================= ANIMACION PRODUCTO =================
+// ================= ANIMACION =================
 function animarCarrito(btn) {
-  const img = btn.parentElement.querySelector('img')
-  const imgClone = img.cloneNode(true)
-  const rect = img.getBoundingClientRect()
-  imgClone.style.position = 'fixed'
-  imgClone.style.left = rect.left + 'px'
-  imgClone.style.top = rect.top + 'px'
-  imgClone.style.width = rect.width + 'px'
-  imgClone.style.height = rect.height + 'px'
-  imgClone.style.transition = 'all 0.7s ease-in-out'
-  imgClone.style.zIndex = 1000
-  document.body.appendChild(imgClone)
+  const img = btn.closest('.card').querySelector('img')
+  const clone = img.cloneNode(true)
+  const r = img.getBoundingClientRect()
 
-  const cartIcon = document.querySelector('#botonCarrito')
-  const cartRect = cartIcon.getBoundingClientRect()
+  clone.style.position = 'fixed'
+  clone.style.left = r.left + 'px'
+  clone.style.top = r.top + 'px'
+  clone.style.width = r.width + 'px'
+  clone.style.transition = 'all .7s ease'
+  clone.style.zIndex = 1000
+
+  document.body.appendChild(clone)
+
+  const cart = $('botonCarrito').getBoundingClientRect()
 
   setTimeout(() => {
-    imgClone.style.left = cartRect.left + 'px'
-    imgClone.style.top = cartRect.top + 'px'
-    imgClone.style.width = '0px'
-    imgClone.style.height = '0px'
-    imgClone.style.opacity = '0'
+    clone.style.left = cart.left + 'px'
+    clone.style.top = cart.top + 'px'
+    clone.style.width = '0'
+    clone.style.opacity = '0'
   }, 10)
 
-  setTimeout(() => {
-    imgClone.remove()
-  }, 800)
+  setTimeout(() => clone.remove(), 800)
 }
 
 // ================= INICIO =================
 mostrar('login')
-
-
-
-// Mostrar mensaje por 3 segundos
-const mensaje = $('mensajeSistema');
-mensaje.textContent = "🍹 ¡Bienvenido a CotaDrink! Explora productos, agrégalos al carrito y recibe tu pedido en casa en minutos.";
-mensaje.style.opacity = '1';
-
-setTimeout(() => {
-  mensaje.style.opacity = '0';
-}, 3000);

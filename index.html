@@ -13,8 +13,9 @@
 
 <!-- ================= LOGIN ================= -->
 <section class="pantalla activa" id="login">
-  <img src="assets/CotaDrink logo.png" class="hero" alt="CotaDrink Logo">
-  <h1>CotaDrink</h1>
+  <h1 class="logocota">CotaDrink</h1>
+
+  <h2 class=" entrada">¡Bienvenido a CotaDrink</h2>
   <p class="sub">🔞 Venta exclusiva para mayores de 18 años</p>
 
   <label class="check">
@@ -30,10 +31,10 @@
 
 
   <header class="top-bar">
-    <h2>CotaDrink</h2>
+    <h1 class="logocota">CotaDrink</h1>
     <button class="btn-salir" onclick="salir()">Salir</button>
   </header>
-<p class="mensaje-sistema">¡Bienvenido a CotaDrink! Explora productos, agrégalos al carrito y recibe tu pedido en casa en minutos.</p>
+
 
 
  
@@ -60,7 +61,7 @@
   <div id="productos" class="grid"></div>
 
   <!-- TEXTO LLAMATIVO ABAJO -->
-  <div class="llamativo">
+  <div class="textoeng">
     ¡Disfruta tus tragos favoritos en la puerta de tu casa!
   </div>
 </section>
@@ -68,7 +69,7 @@
 <!-- ================= ORDEN ================= -->
 <section class="pantalla" id="orden">
   <header class="top-bar">
-    <h2>🛒 Mi Orden</h2>
+    <h2 class="logocota">🛒 Mi Orden</h2>
     <button class="btn-salir" onclick="mostrar('menu')">Volver</button>
   </header>
 
@@ -80,7 +81,7 @@
     <hr>
     <h3>Total: $<span id="total">0</span></h3>
     <button class="btn-vaciar" onclick="vaciarCarrito()">Vaciar Carrito</button>
-    <button class="btn-principal" onclick="mostrar('confirmacion')">Continuar</button>
+    <button class="btn-principal" onclick="mostrar('confirmacion')">Enviar Pedido</button>
   </div>
 </section>
 
