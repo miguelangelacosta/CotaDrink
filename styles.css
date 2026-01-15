@@ -592,6 +592,14 @@ body {
 }
 
 /* ================= NAV ================= */
+.nav-inferior button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 12px;
+}
+
+
 
 .nav-inferior {
   position: fixed;
@@ -610,12 +618,6 @@ body {
   z-index: 300;
 }
 
-.nav-inferior button {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 12px;
-}
 
 /* ================= BOTON FLOTANTE ================= */
 
